@@ -70,6 +70,7 @@ subroutine testsuite(string,first,last,ntests,npass,nfail)
  use testpoly,     only:test_poly
  use testdamping,  only:test_damping
  use testradiation,only:test_radiation
+ use testchemistry,only:test_chemistry
 #ifdef MPI
  use testmpi,      only:test_mpi
 #endif
@@ -84,6 +85,7 @@ subroutine testsuite(string,first,last,ntests,npass,nfail)
  logical :: dosetdisc,dosetstar,doeos,docooling,dodust,donimhd,docorotate,doany,dogrowth
  logical :: dogr,doradiation,dopart,dopoly,dompi,dohier,dodamp,dowind,&
             doiorig,doapr
+ logical :: dochemistry
 #ifdef FINVSQRT
  logical :: usefsqrt,usefinvsqrt
 #endif
@@ -141,6 +143,7 @@ subroutine testsuite(string,first,last,ntests,npass,nfail)
  dowind     = .false.
  doapr      = .false.
  doiorig    = .false.
+ dochemistry = .false.
 
  if (index(string,'deriv')     /= 0) doderivs  = .true.
  if (index(string,'grav')      /= 0) dogravity = .true.
@@ -165,10 +168,11 @@ subroutine testsuite(string,first,last,ntests,npass,nfail)
  if (index(string,'iorig')     /= 0) doiorig   = .true.
  if (index(string,'ptmass')    /= 0) doptmass  = .true.
  if (index(string,'apr')       /= 0) doapr     = .true.
+ if (index(string,'chem')      /= 0) dochemistry = .true.
 
  doany = any((/doderivs,dogravity,dodust,dogrowth,donimhd,dorwdump,&
                doptmass,docooling,dogeom,dogr,dosmol,doradiation,&
-               dopart,dopoly,dohier,dodamp,dowind,doiorig,doapr/))
+               dopart,dopoly,dohier,dodamp,dowind,doiorig,doapr,dochemistry/))
 
  select case(trim(string))
  case('kernel','kern')
@@ -440,7 +444,13 @@ subroutine testsuite(string,first,last,ntests,npass,nfail)
     call test_wind(ntests,npass)
     call set_default_options_testsuite(iverbose) ! restore defaults
  endif
-
+!
+!--test of chemistry module
+!
+ if (dochemistry.or.testall) then
+   call test_chemistry(ntests,npass)
+   call set_default_options_testsuite(iverbose) ! restore defaults
+endif
 !
 !--test of particle id
 !
